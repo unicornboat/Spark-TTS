@@ -256,8 +256,7 @@ if __name__ == "__main__":
     args = parse_arguments()
 
     # Build the Gradio demo by specifying the model directory and GPU device
-    demo = build_ui(
-        share=True,
-        model_dir=args.model_dir,
-        device=args.device
-    )
+    demo = build_ui(model_dir=args.model_dir, device=args.device)
+
+    # Launch the Gradio app with share=True to generate a public URL
+    demo.launch(share=True, server_name=args.server_name, server_port=args.server_port)
