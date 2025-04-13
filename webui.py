@@ -27,25 +27,24 @@ from sparktts.utils.token_parser import LEVELS_MAP_UI
 
 
 def initialize_model(model_dir="pretrained_models/Spark-TTS-0.5B", device=0):
-    """Load the model once at the beginning."""
     logging.info(f"Loading model from: {model_dir}")
-
-    # Determine appropriate device based on platform and availability
-    if platform.system() == "Darwin":
-        # macOS with MPS support (Apple Silicon)
-        device = torch.device(f"mps:{device}")
-        logging.info(f"Using MPS device: {device}")
-    elif torch.cuda.is_available():
-        # System with CUDA support
-        device = torch.device(f"cuda:{device}")
-        logging.info(f"Using CUDA device: {device}")
-    else:
-        # Fall back to CPU
-        device = torch.device("cpu")
-        logging.info("GPU acceleration not available, using CPU")
-
-    model = SparkTTS(model_dir, device)
-    return model
+    if not os.path.exists(model_dir):
+        raise FileNotFoundError(f"Model directory {model_dir} does not exist")
+    try:
+        if platform.system() == "Darwin":
+            device = torch.device(f"mps:{device}")
+            logging.info(f"Using MPS device: {device}")
+        elif torch.cuda.is_available():
+            device = torch.device(f"cuda:{device}")
+            logging.info(f"Using CUDA device: {device}")
+        else:
+            device = torch.device("cpu")
+            logging.info("GPU acceleration not available, using CPU")
+        model = SparkTTS(model_dir, device)
+        return model
+    except Exception as e:
+        logging.error(f"Failed to load model: {e}")
+        raise
 
 
 def run_tts(
@@ -258,13 +257,7 @@ if __name__ == "__main__":
 
     # Build the Gradio demo by specifying the model directory and GPU device
     demo = build_ui(
+        share=True,
         model_dir=args.model_dir,
         device=args.device
-    )
-
-    # Launch Gradio with the specified server name and port
-    demo.launch(
-        share=True,
-        server_name=args.server_name,
-        server_port=args.server_port
     )
