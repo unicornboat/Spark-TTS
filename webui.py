@@ -264,6 +264,7 @@ if __name__ == "__main__":
 
     # Launch Gradio with the specified server name and port
     demo.launch(
+        share=True
         server_name=args.server_name,
         server_port=args.server_port
     )
